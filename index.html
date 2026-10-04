@@ -1,0 +1,436 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,sans-serif;background:#fafaf9}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Regata das Pontes</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800&family=Figtree:wght@400;500;600;700&display=swap"><style id="page-style">
+:root{
+  color-scheme:dark;
+  --ink:#0b1424;
+  --panel:#111e35;
+  --line:#2a3d63;
+  --text:#e8edf7;
+  --muted:#8c9cbd;
+  --gold:#f2c46b;
+  --gaia:#d0435a;
+  --arrabida:#f0b43c;
+  --ok:#6fd3a3;
+  --err:#ff8a8a;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--ink);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:28px 48px;display:flex;flex-direction:column;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin:0 0 4px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(40px,7vw,68px);line-height:.9;margin:0;letter-spacing:.01em;text-wrap:balance}
+.sub{margin:8px 0 0;color:var(--muted);max-width:60ch}
+.updated{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.map{border:1px solid var(--line);border-radius:10px;overflow-x:auto;background:#0a1a33}
+.map svg{display:block;width:100%;min-width:760px;height:auto}
+.boat .bob{animation:bob 3.2s ease-in-out infinite}
+#boat-arrabida .bob{animation-delay:-1.4s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(2.5px)}}
+.ripple{animation:shimmer 5s ease-in-out infinite}
+@keyframes shimmer{0%,100%{opacity:.08}50%{opacity:.32}}
+@media (prefers-reduced-motion:reduce){.boat .bob,.ripple{animation:none}}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.team{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;grid-template-columns:64px 1fr auto;grid-template-areas:"icon who pts" "track track track" "next next next";gap:10px 14px;align-items:center}
+.team svg.mini{grid-area:icon;width:64px;height:60px}
+.who{grid-area:who;display:flex;flex-direction:column;gap:4px;min-width:0}
+.who .name{font-family:var(--display);font-weight:700;font-size:28px;line-height:1;letter-spacing:.02em}
+.who .store{font-size:13px;color:var(--muted)}
+.chip{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:rgba(242,196,107,.14);color:var(--gold)}
+.pts{grid-area:pts;text-align:right;font-variant-numeric:tabular-nums}
+.pts b{display:block;font-family:var(--display);font-weight:800;font-size:54px;line-height:.9}
+.pts span{font-size:12px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.track{grid-area:track;position:relative;padding-bottom:18px}
+.bar{height:8px;border-radius:999px;background:#1c2c4b;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;transition:width 1.2s ease}
+.tick{position:absolute;top:-3px;width:2px;height:14px;background:#46598a;transform:translateX(-1px)}
+.tick.done{background:var(--text)}
+.tick em{position:absolute;top:16px;font-style:normal;font-size:11px;color:var(--muted);white-space:nowrap;transform:translateX(-50%)}
+.tick:last-of-type em{transform:translateX(-100%)}
+.next{grid-area:next;margin:0;font-size:14px;color:var(--muted)}
+.next strong{color:var(--text);font-weight:600}
+footer{display:flex;justify-content:flex-end}
+.linkbtn{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px}
+.linkbtn:hover{color:var(--text)}
+.admin{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px;max-width:560px}
+.admin h2{font-family:var(--display);font-weight:700;font-size:26px;margin:0;letter-spacing:.02em}
+.admin form{display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:13px;color:var(--muted)}
+input{font:inherit;color:var(--text);background:#0b1629;border:1px solid var(--line);border-radius:8px;padding:9px 12px;width:100%}
+input:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.stepper{display:grid;grid-template-columns:44px 1fr 44px;gap:6px}
+.stepper input{text-align:center;font-variant-numeric:tabular-nums;font-size:20px;font-weight:600}
+.stepper button{font:inherit;font-size:20px;background:#1a2a48;color:var(--text);border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.stepper button:hover{background:#223661}
+.primary{font:inherit;font-weight:700;background:var(--gold);color:#1a1405;border:0;border-radius:8px;padding:11px 16px;cursor:pointer}
+.primary:disabled{opacity:.6;cursor:wait}
+.row-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.msg{margin:0;font-size:14px;min-height:1.5em}
+.msg.err{color:var(--err)}
+.msg.ok{color:var(--ok)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#16325a;border:1px solid #3d6bb0;color:var(--text);padding:10px 16px;border-radius:8px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+</style><div id="root"></div><script type="application/json" id="state">{"updated":"2026-09-30T22:29:12.758Z","gaia":0,"arrabida":0}</script><script id="main">
+(function(){
+"use strict";
+var PASS_HASH="bb5804a6372e90e414dad8617c024d5559b4a79d61cbd910f6908fa3aed4127c";
+var ADMIN_USER="AdminLeal";
+var REPO="Boxib/regata-das-pontes";
+
+var state=JSON.parse(document.getElementById("state").textContent);
+var BRIDGES=[
+  {n:"Freixo",full:"Ponte do Freixo",w:24,kind:"freixo"},
+  {n:"São João",full:"Ponte de São João",w:14,kind:"sjoao"},
+  {n:"Maria Pia",full:"Ponte Maria Pia",w:10,kind:"mpia"},
+  {n:"Infante",full:"Ponte do Infante",w:16,kind:"infante"},
+  {n:"Luís I",full:"Ponte Luís I",w:16,kind:"luis"},
+  {n:"Arrábida",full:"Ponte da Arrábida",w:20,kind:"arrabida"}
+];
+var TEAMS=[
+  {id:"gaia",name:"Gaia",letter:"G",color:"#d0435a",dark:"#7d1f2f",lane:46},
+  {id:"arrabida",name:"Arrábida",letter:"A",color:"#f0b43c",dark:"#8a5a10",lane:-30}
+];
+// Invisible grid: 1 point = 1 cell. Boats sail west (right to left), toward the sea.
+var PER=10,X0=1500,STEP=22.5,MAXP=64;
+function px(p){return X0-STEP*Math.min(Math.max(p,0),MAXP)}
+function yc(x){return 350+34*Math.sin(x/1600*Math.PI*1.7+0.5)}
+function hw(x){return 80+8*Math.sin(x/260+1)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function f1(n){return Math.round(n*10)/10}
+
+/* ---------- map ---------- */
+function bridgeGeom(i){var bx=px((i+1)*PER);return{bx:bx,yT:yc(bx)-hw(bx)-28,yB:yc(bx)+hw(bx)+28}}
+
+function icon(kind){
+  var L='stroke="#dfe7f5" fill="none" stroke-linecap="round"';
+  switch(kind){
+    case"freixo":return'<rect x="0" y="6" width="48" height="4" fill="#dfe7f5"/><g '+L+' stroke-width="2"><path d="M7 10V20M17 10V20M31 10V20M41 10V20"/></g>';
+    case"sjoao":return'<rect x="0" y="4" width="48" height="3" fill="#dfe7f5"/><g '+L+' stroke-width="2.4"><path d="M9 20L17 7M39 20L31 7"/></g>';
+    case"mpia":return'<path d="M0 4H48" '+L+' stroke-width="2"/><path d="M6 20Q24 -8 42 20" stroke="#e0664f" stroke-width="3.2" fill="none"/><path d="M15 4V11M24 4V6M33 4V11" '+L+' stroke-width="1.2"/>';
+    case"infante":return'<rect x="0" y="4" width="48" height="4" fill="#dfe7f5"/><path d="M3 20Q24 2 45 20" '+L+' stroke-width="2.4"/>';
+    case"arrabida":return'<path d="M0 3H48" '+L+' stroke-width="2.4"/><path d="M1 20Q24 -2 47 20" '+L+' stroke-width="3.4"/><path d="M8 3V13M14 3V8M34 3V8M40 3V13" '+L+' stroke-width="1.2"/>';
+    case"luis":return'<path d="M0 2H48M8 14H40" '+L+' stroke-width="2"/><path d="M6 20Q24 -10 42 20" '+L+' stroke-width="3"/><path d="M13 9V14M18 5V14M30 5V14M35 9V14" '+L+' stroke-width="1"/>';
+  }
+  return"";
+}
+
+function drawBridge(b,i){
+  var g=bridgeGeom(i),bx=g.bx,yT=g.yT,yB=g.yB,w=b.w,x=bx-w/2,s="";
+  s+='<rect x="'+f1(x-2)+'" y="'+f1(yT-44)+'" width="'+(w+4)+'" height="44" fill="#253a62"/>';
+  s+='<rect x="'+f1(x-2)+'" y="'+f1(yB)+'" width="'+(w+4)+'" height="44" fill="#253a62"/>';
+  s+='<rect x="'+f1(x+9)+'" y="'+f1(yT+30)+'" width="'+w+'" height="'+f1(yB-yT-60)+'" fill="#000" opacity=".38" rx="2"/>';
+  var fill={freixo:"#8d99ae",sjoao:"#a7b1c2",mpia:"url(#latRed)",infante:"#d6dbe4",arrabida:"#c9d0db",luis:"url(#latIron)"}[b.kind];
+  s+='<rect x="'+f1(x)+'" y="'+f1(yT)+'" width="'+w+'" height="'+f1(yB-yT)+'" fill="'+fill+'" rx="2"/>';
+  s+='<path d="M'+f1(x)+' '+f1(yT)+'V'+f1(yB)+'M'+f1(x+w)+' '+f1(yT)+'V'+f1(yB)+'" stroke="#e6ecf7" stroke-width="1.2" opacity=".75"/>';
+  if(b.kind==="freixo")s+='<path d="M'+f1(bx)+' '+f1(yT+4)+'V'+f1(yB-4)+'" stroke="#f4f6fa" stroke-width="1.2" stroke-dasharray="6 6"/>';
+  if(b.kind==="luis"){
+    s+='<rect x="'+f1(bx-15)+'" y="'+f1(yT-6)+'" width="30" height="12" fill="#56688c" rx="1"/>';
+    s+='<rect x="'+f1(bx-15)+'" y="'+f1(yB-6)+'" width="30" height="12" fill="#56688c" rx="1"/>';
+  }
+  for(var y=yT+6;y<yB-3;y+=14){
+    s+='<circle cx="'+f1(x-2)+'" cy="'+f1(y)+'" r="1.7" fill="#f2c46b"/><circle cx="'+f1(x+w+2)+'" cy="'+f1(y)+'" r="1.7" fill="#f2c46b"/>';
+  }
+  // badge
+  var bw=136,bh=48,bl=bx-bw/2,by=yT-104;
+  s+='<path d="M'+f1(bx)+' '+f1(by+bh)+'V'+f1(yT-46)+'" stroke="#5470a6" stroke-width="1.5" stroke-dasharray="2 4"/>';
+  s+='<rect x="'+f1(bl)+'" y="'+f1(by)+'" width="'+bw+'" height="'+bh+'" rx="7" fill="#0e1a30" stroke="#3d5687"/>';
+  s+='<g transform="translate('+f1(bl+10)+' '+f1(by+14)+')">'+icon(b.kind)+'</g>';
+  s+='<text x="'+f1(bl+66)+'" y="'+f1(by+22)+'" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="700" font-size="17" fill="#e8edf7">'+esc(b.n)+'</text>';
+  s+='<text x="'+f1(bl+66)+'" y="'+f1(by+39)+'" font-family="Figtree, sans-serif" font-weight="600" font-size="12" fill="#f2c46b">'+((i+1)*PER)+' pontos</text>';
+  return s;
+}
+
+function boatShape(t){
+  return ''+
+  '<path d="M40 2Q62 0 90 6M40 7Q64 12 90 16" stroke="#c6d6f5" stroke-width="1.6" fill="none" opacity=".35"/>'+
+  '<line x1="26" y1="-22" x2="52" y2="10" stroke="#2b1d12" stroke-width="2.6" stroke-linecap="round"/>'+
+  '<path d="M49 6l7 8-4 2-6-7z" fill="#2b1d12"/>'+
+  '<path d="M-42 -14Q-36 -4 -26 3Q0 10 28 3Q34 -2 38 -10L32 -6L-30 -6Z" fill="#5a3a24" stroke="#1f140b" stroke-width="1.5" stroke-linejoin="round"/>'+
+  '<path d="M-28 -2Q0 4 26 -2" stroke="#8a6040" stroke-width="1" fill="none"/>'+
+  '<rect x="20" y="-17" width="16" height="4" fill="#5a3a24" stroke="#1f140b"/>'+
+  '<g fill="#8a5c34" stroke="#3a2616" stroke-width="1"><ellipse cx="-22" cy="-9" rx="3.8" ry="3.2"/><ellipse cx="-14" cy="-9" rx="3.8" ry="3.2"/><ellipse cx="2" cy="-9" rx="3.8" ry="3.2"/><ellipse cx="10" cy="-9" rx="3.8" ry="3.2"/></g>'+
+  '<line x1="-6" y1="-6" x2="-6" y2="-66" stroke="#2b1d12" stroke-width="2.4"/>'+
+  '<line x1="-31" y1="-60" x2="19" y2="-60" stroke="#2b1d12" stroke-width="2"/>'+
+  '<path d="M-28 -58L14 -58Q20 -38 14 -18L-28 -18Q-22 -38 -28 -58Z" fill="'+t.color+'" stroke="'+t.dark+'" stroke-width="1.5"/>'+
+  '<path d="M-26 -44Q-6 -40 16 -44" stroke="'+t.dark+'" stroke-width="1" fill="none" opacity=".5"/>'+
+  '<text x="-7" y="-28" text-anchor="middle" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="24" fill="#fff">'+t.letter+'</text>'+
+  '<path d="M-6 -72L20 -68L-6 -64Z" fill="'+t.color+'"/>';
+}
+
+/* ---------- landmarks: Porto (north bank) and Gaia (south bank) ---------- */
+function inLandmark(cx,cy){
+  var top=yc(cx)-hw(cx),bot=yc(cx)+hw(cx);
+  if(cx>164&&cx<360&&cy<top&&cy>top-66)return true;       // Ribeira
+  if(cx>238&&cx<314&&cy>12&&cy<172)return true;            // Clérigos
+  if(cx>440&&cx<540&&cy>150&&cy<238)return true;           // Sé
+  if(cx>1098&&cx<1222&&cy>34&&cy<124)return true;          // Dragão
+  if(cx>460&&cx<592&&cy>488&&cy<590)return true;           // Serra do Pilar
+  if(cx>170&&cx<358&&cy>bot+18&&cy<bot+96)return true;     // Caves
+  return false;
+}
+function cap(x,y,txt){return'<text x="'+f1(x)+'" y="'+f1(y)+'" text-anchor="middle" font-family="Figtree, sans-serif" font-weight="700" font-size="11" letter-spacing="1.5" fill="#dbe4f5" stroke="#0b1424" stroke-width="3" paint-order="stroke">'+esc(txt.toUpperCase())+'</text>'}
+function R(x,y,w,h,fill,extra){return'<rect x="'+f1(x)+'" y="'+f1(y)+'" width="'+f1(w)+'" height="'+f1(h)+'" fill="'+fill+'"'+(extra||"")+'/>'}
+var LIT="#ffe29a",OUT=' stroke="#0b1424" stroke-width="1.2" stroke-linejoin="round"';
+
+function ribeira(r){
+  var s="",cols=["#e0b64a","#d9694f","#4f86c6","#ecdcbc","#c96f86","#6aa38a","#e38a3e","#b9c4d8","#a8423a"],x=168;
+  while(x<356){
+    var w=9+r()*7;
+    if(x+w>356)break;
+    var m=x+w/2,base=yc(m)-hw(m)-21,h=22+r()*16;
+    s+=R(x,base-h,w,h,cols[(r()*cols.length)|0],' stroke="#0b1424" stroke-width=".8"');
+    s+=R(x-.5,base-h-3,w+1,3.5,"#9e4b36",' stroke="#0b1424" stroke-width=".6"');
+    for(var wy=base-h+5;wy<base-6;wy+=7)for(var wx=x+2;wx<x+w-3;wx+=4.5)s+=R(wx,wy,2.4,3.4,r()<.45?LIT:"#1b2438");
+    x+=w+.6;
+  }
+  return s+cap(262,yc(262)-hw(262)-68,"Ribeira");
+}
+function clerigos(x,b){
+  var s='<g'+OUT+'>'+R(x+6,b-26,40,26,"#dccca6")+'<path d="M'+(x+6)+' '+(b-26)+'L'+(x+26)+' '+(b-38)+'L'+(x+46)+' '+(b-26)+'Z" fill="#c8704a"/>'+
+    R(x-11,b-84,22,84,"#eadfbf")+R(x-14,b-54,28,5,"#cdbb92")+R(x-14,b-87,28,5,"#cdbb92")+R(x-8,b-104,16,17,"#eadfbf")+
+    '<path d="M'+(x-9)+' '+(b-104)+'Q'+x+' '+(b-122)+' '+(x+9)+' '+(b-104)+'Z" fill="#cdbb92"/><path d="M'+x+' '+(b-117)+'V'+(b-131)+'M'+(x-3)+' '+(b-126)+'H'+(x+3)+'" fill="none"/></g>';
+  s+=R(x-3,b-77,6,10,LIT)+R(x-3,b-46,6,10,LIT)+R(x-2.5,b-100,5,8,LIT)+R(x-3,b-14,6,14,"#3a2a1a")+R(x+20,b-16,12,16,"#3a2a1a");
+  return s+cap(x+14,b+14,"Clérigos");
+}
+function se(x,b){
+  var s='<ellipse cx="'+x+'" cy="'+b+'" rx="46" ry="8" fill="#5b6275"/><g'+OUT+'>'+R(x-18,b-28,36,28,"#d3c7a8")+
+    R(x-32,b-48,15,48,"#ddd1b2")+R(x+17,b-48,15,48,"#ddd1b2")+
+    '<path d="M'+(x-32)+' '+(b-48)+'Q'+(x-24.5)+' '+(b-62)+' '+(x-17)+' '+(b-48)+'ZM'+(x+17)+' '+(b-48)+'Q'+(x+24.5)+' '+(b-62)+' '+(x+32)+' '+(b-48)+'Z" fill="#8e96a6"/>'+
+    '<circle cx="'+x+'" cy="'+(b-18)+'" r="5.5" fill="#3f6fb0"/></g>';
+  s+=R(x-4,b-8,8,8,"#3a2a1a")+R(x-27,b-38,5,8,LIT)+R(x+22,b-38,5,8,LIT);
+  for(var k=0;k<3;k++)s+=R(x-17+k*13,b-32,6,4,"#ddd1b2",OUT);
+  return s+cap(x,b+18,"Sé");
+}
+function dragao(x,y){
+  return'<ellipse cx="'+x+'" cy="'+y+'" rx="58" ry="34" fill="#1f4f9c"'+OUT+'/><ellipse cx="'+x+'" cy="'+y+'" rx="52" ry="29" fill="none" stroke="#7fb2ff" stroke-width="2"/>'+
+    '<ellipse cx="'+x+'" cy="'+y+'" rx="40" ry="21" fill="#3f8f4f"/><g fill="none" stroke="#e8f5e8" stroke-width=".9" opacity=".8"><rect x="'+(x-32)+'" y="'+(y-15)+'" width="64" height="30"/><path d="M'+x+' '+(y-15)+'V'+(y+15)+'"/><circle cx="'+x+'" cy="'+y+'" r="5"/></g>'+
+    cap(x,y-42,"Dragão");
+}
+function azulejo(x,y){
+  var s="";
+  for(var i=0;i<2;i++)for(var j=0;j<2;j++){var tx=x+i*18,ty=y+j*18;
+    s+=R(tx,ty,18,18,"#eef3fb",' stroke="#2f5fae" stroke-width=".8"')+
+      '<path d="M'+(tx+9)+' '+(ty+2)+'L'+(tx+16)+' '+(ty+9)+'L'+(tx+9)+' '+(ty+16)+'L'+(tx+2)+' '+(ty+9)+'Z" fill="none" stroke="#2f5fae" stroke-width="1.2"/><circle cx="'+(tx+9)+'" cy="'+(ty+9)+'" r="3" fill="#2f5fae"/>'+
+      '<path d="M'+tx+' '+(ty+4)+'A4 4 0 0 0 '+(tx+4)+' '+ty+'L'+tx+' '+ty+'ZM'+(tx+18)+' '+(ty+14)+'A4 4 0 0 0 '+(tx+14)+' '+(ty+18)+'L'+(tx+18)+' '+(ty+18)+'Z" fill="#2f5fae"/>';
+  }
+  return s;
+}
+function serraPilar(x,b){
+  var s='<ellipse cx="'+x+'" cy="'+b+'" rx="62" ry="10" fill="#2f5a3f"/><g'+OUT+'>'+R(x+14,b-18,40,18,"#e6dcc4")+R(x+13,b-21,42,4,"#b65a3c")+
+    R(x-22,b-30,44,30,"#efe6d2")+'<path d="M'+(x-22)+' '+(b-30)+'Q'+x+' '+(b-64)+' '+(x+22)+' '+(b-30)+'Z" fill="#c9b98f"/>'+R(x-3,b-56,6,8,"#efe6d2")+
+    '<path d="M'+x+' '+(b-56)+'V'+(b-66)+'M'+(x-3)+' '+(b-62)+'H'+(x+3)+'" fill="none"/></g>';
+  for(var k=0;k<4;k++)s+=R(x-17+k*10,b-22,5,9,LIT);
+  for(var k2=0;k2<3;k2++)s+=R(x+19+k2*12,b-13,5,8,"#3a2a1a");
+  return s+cap(x+10,b+18,"Serra do Pilar");
+}
+function teleferico(){
+  var a={x:430,y:540},c={x:172,y:510},s='<g stroke="#0b1424" stroke-width="1.2">'+R(a.x-2,a.y-22,4,22,"#9aa6bc")+R(c.x-2,c.y-22,4,22,"#9aa6bc")+'</g>';
+  s+='<path d="M'+a.x+' '+(a.y-22)+'Q'+((a.x+c.x)/2)+' '+((a.y+c.y)/2-10)+' '+c.x+' '+(c.y-22)+'" fill="none" stroke="#c9d4ea" stroke-width="1.2"/>';
+  [.32,.7].forEach(function(t){var px2=a.x+(c.x-a.x)*t,py=(1-t)*(1-t)*(a.y-22)+2*(1-t)*t*((a.y+c.y)/2-10)+t*t*(c.y-22);
+    s+='<path d="M'+f1(px2)+' '+f1(py)+'v6" stroke="#c9d4ea"/>'+R(px2-5,py+6,10,8,"#d0435a",' rx="2" stroke="#0b1424"')+R(px2-3,py+8,6,3,LIT);});
+  return s;
+}
+function caves(){
+  var s="",defs=[[184,38,"RUBY","#b65a3c"],[226,42,"TAWNY","#9e4b36"],[272,46,"VINTAGE","#c8704a"],[322,32,"CAVES","#a0503a"]];
+  defs.forEach(function(d){var x=d[0],w=d[1],m=x+w/2,b=yc(m)+hw(m)+72;
+    s+='<g'+OUT+'>'+R(x,b-18,w,18,"#ece2cc")+'<path d="M'+(x-2)+' '+(b-18)+'L'+(x+5)+' '+(b-33)+'L'+(x+w-5)+' '+(b-33)+'L'+(x+w+2)+' '+(b-18)+'Z" fill="'+d[3]+'"/></g>';
+    s+='<text x="'+f1(m)+'" y="'+f1(b-22)+'" text-anchor="middle" font-family="Figtree, sans-serif" font-weight="800" font-size="8.5" letter-spacing="1" fill="#fff">'+d[2]+'</text>';
+    for(var k=x+6;k<x+w-6;k+=11)s+='<path d="M'+f1(k)+' '+f1(b)+'v-8a3 3 0 0 1 6 0v8z" fill="#5a2a1e"/>';
+    s+='<g fill="#8a5c34" stroke="#3a2616" stroke-width=".8"><ellipse cx="'+f1(x+w-4)+'" cy="'+f1(b+4)+'" rx="3.4" ry="3"/><ellipse cx="'+f1(x+w+3)+'" cy="'+f1(b+4)+'" rx="3.4" ry="3"/></g>';
+  });
+  return s+cap(268,yc(268)+hw(268)+88,"Caves do vinho do Porto");
+}
+function landmarks(r){
+  return ribeira(r)+clerigos(262,150)+se(490,214)+dragao(1160,85)+azulejo(578,28)+azulejo(986,28)+
+    serraPilar(520,562)+teleferico()+caves();
+}
+
+function buildMap(){
+  var r=rng(1837),s="";
+  s+='<svg viewBox="0 0 1600 680" role="img" aria-labelledby="mapTitle"><title id="mapTitle">Mapa do rio Douro com as pontes do Freixo, São João, Maria Pia, Infante, Luís I e Arrábida, e a posição dos barcos de Gaia e Arrábida</title>';
+  s+='<defs>'+
+    '<linearGradient id="riverG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2448"/><stop offset=".5" stop-color="#0a1c3a"/><stop offset="1" stop-color="#0d2448"/></linearGradient>'+
+    '<radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f2c46b" stop-opacity=".22"/><stop offset="1" stop-color="#f2c46b" stop-opacity="0"/></radialGradient>'+
+    '<pattern id="latRed" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#a8412f"/><path d="M0 0L6 6M6 0L0 6" stroke="#e07a5f" stroke-width="1"/></pattern>'+
+    '<pattern id="latIron" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#465775"/><path d="M0 0L6 6M6 0L0 6" stroke="#8fa3c7" stroke-width="1"/></pattern>'+
+  '</defs>';
+  s+='<rect width="1600" height="680" fill="#15213a"/>';
+  // parks: Jardim do Morro (Gaia) and Fontainhas slope (Porto)
+  var parks=[{x:425,y:545,rx:48,ry:24},{x:540,y:252,rx:40,ry:15}];
+  parks.forEach(function(p){s+='<ellipse cx="'+f1(p.x)+'" cy="'+f1(p.y)+'" rx="'+p.rx+'" ry="'+p.ry+'" fill="#16322f"/>';for(var k=0;k<14;k++){var a=r()*6.28,d=Math.sqrt(r());s+='<circle cx="'+f1(p.x+Math.cos(a)*d*p.rx*.85)+'" cy="'+f1(p.y+Math.sin(a)*d*p.ry*.8)+'" r="'+f1(3+r()*3)+'" fill="#1f4a3f"/>';}});
+  // quay roads
+  var top=[],bot=[],rt=[],rb=[];
+  for(var x=-20;x<=1620;x+=20){top.push(x+","+f1(yc(x)-hw(x)));bot.push(x+","+f1(yc(x)+hw(x)));rt.push(x+","+f1(yc(x)-hw(x)-16));rb.push(x+","+f1(yc(x)+hw(x)+16));}
+  s+='<polyline points="'+rt.join(" ")+'" fill="none" stroke="#243a61" stroke-width="7"/><polyline points="'+rb.join(" ")+'" fill="none" stroke="#243a61" stroke-width="7"/>';
+  // city blocks
+  var FP=["#b65a3c","#c8704a","#9e4b36","#d9a85a","#4f7fb8","#c77a86","#8a4a3a","#d08a5a","#5f9a78"],
+      FG=["#b65a3c","#c8704a","#e3d5b8","#7a2e3e","#a0503a","#d9a85a","#9e4b36","#cf6a52"],
+      geo=BRIDGES.map(function(b,i){return bridgeGeom(i)});
+  for(var gy=4;gy<680;gy+=19){for(var gx=2;gx<1600;gx+=23){
+    var bx0=gx+r()*6,by0=gy+r()*5,w=9+r()*12,h=8+r()*9,cx=bx0+w/2,cy=by0+h/2;
+    if(r()<.12)continue;
+    if(Math.abs(cy-yc(cx))<hw(cx)+30)continue;
+    if(cx>570&&cx<1030&&cy>22&&cy<82)continue;
+    if(cx>520&&cx<1080&&cy>622&&cy<672)continue;
+    if(cx>1500&&cy<110)continue;
+    if(inLandmark(cx,cy))continue;
+    var skip=false;
+    for(var k=0;k<geo.length;k++){var q=geo[k];if(Math.abs(cx-q.bx)<16){skip=true;break}if(Math.abs(cx-q.bx)<80&&cy>q.yT-112&&cy<q.yT-48){skip=true;break}}
+    if(!skip)for(var p=0;p<parks.length;p++){var P=parks[p],dx=(cx-P.x)/(P.rx+8),dy=(cy-P.y)/(P.ry+8);if(dx*dx+dy*dy<1){skip=true;break}}
+    if(skip)continue;
+    var pal=cy<yc(cx)?FP:FG;
+    s+='<rect x="'+f1(bx0)+'" y="'+f1(by0)+'" width="'+f1(w)+'" height="'+f1(h)+'" rx="1.5" fill="'+pal[(r()*pal.length)|0]+'" opacity="'+f1(.62+r()*.3)+'"/>';
+    s+='<path d="M'+f1(bx0+1)+' '+f1(by0+h/2)+'h'+f1(w-2)+'" stroke="#0b1424" stroke-width=".8" opacity=".35"/>';
+    if(r()<.22)s+='<rect x="'+f1(bx0+2+r()*(w-5))+'" y="'+f1(by0+2+r()*(h-5))+'" width="2.6" height="2.6" fill="#ffe29a" opacity="'+f1(.6+r()*.4)+'"/>';
+  }}
+  s+=landmarks(r);
+  // river
+  s+='<path d="M'+top.join(" L")+" L"+bot.slice().reverse().join(" L")+'Z" fill="url(#riverG)"/>';
+  s+='<polyline points="'+top.join(" ")+'" fill="none" stroke="#7f97c4" stroke-width="2" opacity=".55"/><polyline points="'+bot.join(" ")+'" fill="none" stroke="#7f97c4" stroke-width="2" opacity=".55"/>';
+  for(var i=0;i<110;i++){var rx=r()*1600,off=(r()*2-1)*(hw(rx)-12),ry=yc(rx)+off,len=8+r()*22;s+='<path class="ripple" style="animation-delay:-'+f1(r()*5)+'s" d="M'+f1(rx)+' '+f1(ry)+'h'+f1(len)+'" stroke="#9fbcf0" stroke-width="1.5" stroke-linecap="round" opacity=".2"/>';}
+  [192,240,288,334].forEach(function(mx,k){var my=yc(mx)+hw(mx)-13;s+='<g transform="translate('+f1(mx)+' '+f1(my)+') scale(.5)" opacity=".85"><path d="M-42 -14Q-36 -4 -26 3Q0 10 28 3Q34 -2 38 -10L32 -6L-30 -6Z" fill="#5a3a24" stroke="#1f140b" stroke-width="2"/><g fill="#8a5c34" stroke="#3a2616"><ellipse cx="-18" cy="-9" rx="4" ry="3.4"/><ellipse cx="-8" cy="-9" rx="4" ry="3.4"/><ellipse cx="2" cy="-9" rx="4" ry="3.4"/></g><line x1="-6" y1="-6" x2="-6" y2="-46" stroke="#2b1d12" stroke-width="3"/><rect x="-22" y="-46" width="32" height="6" rx="3" fill="#e3d5b8" stroke="#6b5a40"/></g>'});
+  geo.forEach(function(q){s+='<ellipse cx="'+f1(q.bx)+'" cy="'+f1(yc(q.bx))+'" rx="60" ry="'+f1(hw(q.bx))+'" fill="url(#glow)"/>';for(var k=0;k<8;k++){var yy=yc(q.bx)+(r()*2-1)*(hw(q.bx)-10);s+='<path d="M'+f1(q.bx-18-r()*16)+' '+f1(yy)+'h'+f1(6+r()*8)+'M'+f1(q.bx+14+r()*14)+' '+f1(yy+3)+'h'+f1(6+r()*8)+'" stroke="#f2c46b" stroke-width="1.4" stroke-linecap="round" opacity=".4"/>';}});
+  // labels
+  s+='<text x="800" y="64" text-anchor="middle" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="34" letter-spacing="14" fill="#5f79ad">PORTO</text>';
+  s+='<text x="800" y="656" text-anchor="middle" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="800" font-size="30" letter-spacing="12" fill="#5f79ad">VILA NOVA DE GAIA</text>';
+  s+='<text x="870" y="'+f1(yc(870)+hw(870)-14)+'" text-anchor="middle" font-family="Figtree, sans-serif" font-style="italic" font-weight="500" font-size="16" letter-spacing="10" fill="#9fbcf0" opacity=".35">RIO DOURO</text>';
+  s+='<text x="26" y="'+f1(yc(26)+5)+'" font-family="Figtree, sans-serif" font-weight="700" font-size="12" letter-spacing="3" fill="#9fbcf0" opacity=".6">◂ FOZ</text>';
+  // start line
+  var sx=X0-46;
+  s+='<path d="M'+f1(sx)+' '+f1(yc(sx)-hw(sx)+4)+'V'+f1(yc(sx)+hw(sx)-4)+'" stroke="#e8edf7" stroke-width="3" stroke-dasharray="7 7" opacity=".7"/>';
+  s+='<text x="'+f1(sx)+'" y="'+f1(yc(sx)+hw(sx)-9)+'" text-anchor="middle" font-family="Big Shoulders Display, Arial Narrow, sans-serif" font-weight="700" font-size="18" letter-spacing="4" fill="#e8edf7" stroke="#0a1c3a" stroke-width="5" paint-order="stroke">PARTIDA</text>';
+  // compass
+  s+='<g transform="translate(1548 58)"><circle r="24" fill="#0e1a30" stroke="#3d5687"/><path d="M0 -17L6 4L0 0L-6 4Z" fill="#e8edf7"/><path d="M0 17L6 4L0 0L-6 4Z" fill="#5f79ad"/><text y="-28" text-anchor="middle" font-family="Figtree, sans-serif" font-weight="700" font-size="12" fill="#8c9cbd">N</text></g>';
+  BRIDGES.forEach(function(b,i){s+=drawBridge(b,i)});
+  TEAMS.slice().sort(function(a,b){return a.lane-b.lane}).forEach(function(t){
+    s+='<g id="boat-'+t.id+'" class="boat"><g class="bob">'+boatShape(t)+'</g>'+
+      '<text x="-6" y="-80" text-anchor="middle" font-family="Figtree, sans-serif" font-weight="700" font-size="13" letter-spacing="2" fill="#e8edf7" stroke="#0b1424" stroke-width="3" paint-order="stroke">'+esc(t.name.toUpperCase())+'</text></g>';
+  });
+  return s+'</svg>';
+}
+
+function placeBoat(id,lane,x){var g=document.getElementById("boat-"+id);if(g)g.setAttribute("transform","translate("+f1(x)+" "+f1(yc(x)+lane)+")")}
+var shown={gaia:0,arrabida:0},anim=null;
+function sailTo(target,dur){
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var from={gaia:shown.gaia,arrabida:shown.arrabida};
+  if(anim)cancelAnimationFrame(anim);
+  if(reduce||!dur){TEAMS.forEach(function(t){shown[t.id]=target[t.id];placeBoat(t.id,t.lane,px(target[t.id]))});return}
+  var t0=null;
+  function step(ts){
+    if(t0===null)t0=ts;
+    var k=Math.min(1,(ts-t0)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+    TEAMS.forEach(function(t){var p=from[t.id]+(target[t.id]-from[t.id])*e;shown[t.id]=p;placeBoat(t.id,t.lane,px(p))});
+    if(k<1)anim=requestAnimationFrame(step);
+  }
+  anim=requestAnimationFrame(step);
+}
+
+/* ---------- legend ---------- */
+function status(p){
+  if(p>=BRIDGES.length*PER)return'Passou as <strong>'+BRIDGES.length+' pontes</strong>. Chegou à Foz!';
+  var idx=Math.floor(p/PER),left=(idx+1)*PER-p;
+  return'Próxima: <strong>'+esc(BRIDGES[idx].full)+'</strong> · faltam '+left+(left===1?' ponto':' pontos');
+}
+function miniBoat(t){return'<svg class="mini" viewBox="-50 -80 100 92" aria-hidden="true">'+boatShape(t)+'</svg>'}
+function legend(){
+  var a=state.gaia,b=state.arrabida;
+  return TEAMS.map(function(t){
+    var p=state[t.id],other=t.id==="gaia"?b:a,chip="";
+    if(p>other)chip='<span class="chip">Na frente</span>';else if(p===other&&p>0)chip='<span class="chip">Empatados</span>';
+    var pct=Math.min(p,BRIDGES.length*PER)/(BRIDGES.length*PER)*100,ticks="";
+    BRIDGES.forEach(function(br,i){var at=(i+1)/BRIDGES.length*100;ticks+='<span class="tick'+(p>=(i+1)*PER?' done':'')+'" style="left:'+at+'%"><em>'+esc(br.n)+'</em></span>'});
+    return'<article class="team" data-team="'+t.id+'">'+miniBoat(t)+
+      '<div class="who"><span class="name">'+esc(t.name)+'</span><span class="store">Loja '+esc(t.name)+'</span>'+chip+'</div>'+
+      '<div class="pts"><b>'+p+'</b><span>'+(p===1?'ponto':'pontos')+'</span></div>'+
+      '<div class="track" aria-label="'+p+' de '+(BRIDGES.length*PER)+' pontos até à última ponte"><div class="bar"><i style="width:'+pct+'%;background:'+t.color+'"></i></div>'+ticks+'</div>'+
+      '<p class="next">'+status(p)+'</p></article>';
+  }).join("");
+}
+function fmtDate(iso){if(!iso)return"Ainda sem pontos registados";try{return"Atualizado a "+new Date(iso).toLocaleString("pt-PT",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})}catch(e){return""}}
+
+/* ---------- page ---------- */
+var root=document.getElementById("root");
+root.innerHTML=
+ '<div class="wrap">'+
+  '<header><div><p class="kicker">Desafio de lojas · Douro</p><h1>Regata das Pontes</h1>'+
+  '<p class="sub">Dois rabelos, duas lojas. Cada ponto faz o barco avançar uma casa, e a cada 10 pontos passa uma ponte, do Freixo até à Arrábida.</p></div>'+
+  '<p class="updated" id="updated">'+esc(fmtDate(state.updated))+'</p></header>'+
+  '<div class="map" id="map">'+buildMap()+'</div>'+
+  '<section class="board" id="board" aria-live="polite">'+legend()+'</section>'+
+  '<section class="admin" id="admin" hidden>'+
+    '<div id="login"><h2>Administração</h2>'+
+      '<form id="loginForm" autocomplete="off"><div class="field"><label for="user">Utilizador</label><input id="user" name="user" autocomplete="username"></div>'+
+      '<div class="field"><label for="pass">Palavra-passe</label><input id="pass" name="pass" type="password" autocomplete="current-password"></div>'+
+      '<div class="row-actions"><button class="primary" type="submit">Entrar</button><button class="linkbtn" type="button" id="closeAdmin">Fechar</button></div>'+
+      '<p class="msg" id="loginMsg"></p></form></div>'+
+    '<div id="panel" hidden><h2>Atualizar pontos</h2>'+
+      '<form id="scoreForm"><div class="scores">'+
+      TEAMS.map(function(t){return'<div class="field"><label for="in-'+t.id+'">Pontos de '+esc(t.name)+'</label><div class="stepper"><button type="button" data-step="-1" data-for="in-'+t.id+'" aria-label="Menos 1 ponto para '+esc(t.name)+'">−</button><input id="in-'+t.id+'" type="number" min="0" max="999" step="1" inputmode="numeric" value="'+state[t.id]+'"><button type="button" data-step="1" data-for="in-'+t.id+'" aria-label="Mais 1 ponto para '+esc(t.name)+'">+</button></div></div>'}).join("")+
+      '</div><div class="field"><label for="ghtoken">Token do GitHub (só na primeira vez nesta sessão)</label><input id="ghtoken" type="password" autocomplete="off"></div><div class="row-actions"><button class="primary" type="submit" id="saveBtn">Guardar e mover os barcos</button><button class="linkbtn" type="button" id="logout">Sair</button></div>'+
+      '<p class="msg" id="saveMsg"></p></form></div>'+
+  '</section>'+
+  '<footer><button class="linkbtn" type="button" id="openAdmin">Admin</button></footer>'+
+ '</div>';
+
+var $=function(id){return document.getElementById(id)};
+function store(k,v){try{if(v===null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,v)}catch(e){}}
+function recall(k){try{return sessionStorage.getItem(k)}catch(e){return null}}
+
+function applyState(n){state=n;$("board").innerHTML=legend();$("updated").textContent=fmtDate(n.updated);sailTo(n,1600)}
+fetch("state.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null}).then(function(n){if(n&&typeof n.gaia==="number"&&typeof n.arrabida==="number"&&(n.gaia!==state.gaia||n.arrabida!==state.arrabida||n.updated!==state.updated)){if(!$("scoreForm").contains(document.activeElement))applyState(n)}}).catch(function(){});
+sailTo({gaia:0,arrabida:0},0);
+setTimeout(function(){sailTo({gaia:state.gaia,arrabida:state.arrabida},1600)},350);
+
+function showAdmin(open){$("admin").hidden=!open;$("openAdmin").hidden=open;var logged=recall("regata-admin")==="1";$("login").hidden=logged;$("panel").hidden=!logged;if(open)setTimeout(function(){(logged?$("in-gaia"):$("user")).focus()},0)}
+$("openAdmin").onclick=function(){showAdmin(true)};
+$("closeAdmin").onclick=function(){showAdmin(false)};
+$("logout").onclick=function(){store("regata-admin",null);showAdmin(false)};
+if(recall("regata-admin")==="1")showAdmin(true);
+
+async function sha(txt){var buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(txt));return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0")}).join("")}
+$("loginForm").addEventListener("submit",async function(e){
+  e.preventDefault();var msg=$("loginMsg");msg.className="msg";msg.textContent="";
+  var u=$("user").value.trim(),p=$("pass").value;
+  var ok=false;try{ok=u===ADMIN_USER&&(await sha(u+"\n"+p))===PASS_HASH}catch(err){}
+  if(!ok){msg.className="msg err";msg.textContent="Utilizador ou palavra-passe errados.";return}
+  $("pass").value="";store("regata-admin","1");showAdmin(true);
+});
+root.addEventListener("click",function(e){
+  var b=e.target.closest("[data-step]");if(!b)return;
+  var inp=$(b.getAttribute("data-for"));var v=Math.max(0,Math.min(999,(parseInt(inp.value,10)||0)+Number(b.getAttribute("data-step"))));inp.value=v;
+});
+
+$("scoreForm").addEventListener("submit",async function(e){
+  e.preventDefault();var msg=$("saveMsg");msg.className="msg";
+  var next={updated:new Date().toISOString()},bad=false;
+  TEAMS.forEach(function(t){var raw=$("in-"+t.id).value.trim(),v=Number(raw);if(raw===""||!Number.isInteger(v)||v<0||v>999)bad=true;next[t.id]=v});
+  if(bad){msg.className="msg err";msg.textContent="Os pontos têm de ser números inteiros entre 0 e 999.";return}
+  var btn=$("saveBtn");btn.disabled=true;msg.textContent="A guardar…";
+  state=next;$("board").innerHTML=legend();$("updated").textContent=fmtDate(state.updated);sailTo(next,1200);
+  var tok=$("ghtoken").value.trim()||recall("regata-token")||"";
+  if(!tok){btn.disabled=false;msg.className="msg err";msg.textContent="Cola o token do GitHub para poder guardar.";return}
+  var api="https://api.github.com/repos/"+REPO+"/contents/state.json",hd={Authorization:"Bearer "+tok,Accept:"application/vnd.github+json"};
+  try{
+    var cur=await fetch(api,{headers:hd,cache:"no-store"}),sha=null;
+    if(cur.status===401||cur.status===403)throw{code:"auth"};
+    if(cur.ok)sha=(await cur.json()).sha;
+    var body={message:"pontos: Gaia "+next.gaia+" · Arrábida "+next.arrabida,content:btoa(JSON.stringify(next)),sha:sha||undefined};
+    var put=await fetch(api,{method:"PUT",headers:hd,body:JSON.stringify(body)});
+    if(put.status===401||put.status===403)throw{code:"auth"};
+    if(put.status===409||put.status===422)throw{code:"conflict"};
+    if(!put.ok)throw{code:"other"};
+    store("regata-token",tok);$("ghtoken").value="";btn.disabled=false;msg.className="msg ok";msg.textContent="Pontos guardados. Ficam visíveis para todos em cerca de um minuto.";
+  }catch(err){
+    btn.disabled=false;msg.className="msg err";var c=err&&err.code;
+    if(c==="auth")store("regata-token",null);
+    msg.textContent=c==="auth"?"Token inválido ou sem permissão de escrita neste repositório.":c==="conflict"?"Alguém guardou ao mesmo tempo. Volta a tentar.":"Não foi possível guardar os pontos. Tenta outra vez.";
+  }
+});
+
+if(recall("regata-saved")==="1"){store("regata-saved",null);var tst=document.createElement("div");tst.className="toast";tst.setAttribute("role","status");tst.textContent="Pontos guardados. Os barcos já estão na nova posição.";document.body.appendChild(tst);setTimeout(function(){tst.remove()},4000)}
+})();
+</script></body></html>
