@@ -77,7 +77,7 @@ input:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-o
 "use strict";
 var PASS_HASH="bb5804a6372e90e414dad8617c024d5559b4a79d61cbd910f6908fa3aed4127c";
 var ADMIN_USER="AdminLeal";
-var REPO="Boxib/regata-das-pontes";
+var SAVE_URL="https://regata-pontes-save.drt-autor.workers.dev";
 
 var state=JSON.parse(document.getElementById("state").textContent);
 var BRIDGES=[
@@ -370,7 +370,7 @@ root.innerHTML=
     '<div id="panel" hidden><h2>Atualizar pontos</h2>'+
       '<form id="scoreForm"><div class="scores">'+
       TEAMS.map(function(t){return'<div class="field"><label for="in-'+t.id+'">Pontos de '+esc(t.name)+'</label><div class="stepper"><button type="button" data-step="-1" data-for="in-'+t.id+'" aria-label="Menos 1 ponto para '+esc(t.name)+'">−</button><input id="in-'+t.id+'" type="number" min="0" max="999" step="1" inputmode="numeric" value="'+state[t.id]+'"><button type="button" data-step="1" data-for="in-'+t.id+'" aria-label="Mais 1 ponto para '+esc(t.name)+'">+</button></div></div>'}).join("")+
-      '</div><div class="field"><label for="ghtoken">Token do GitHub (só na primeira vez nesta sessão)</label><input id="ghtoken" type="password" autocomplete="off"></div><div class="row-actions"><button class="primary" type="submit" id="saveBtn">Guardar e mover os barcos</button><button class="linkbtn" type="button" id="logout">Sair</button></div>'+
+      '</div><div class="row-actions"><button class="primary" type="submit" id="saveBtn">Guardar e mover os barcos</button><button class="linkbtn" type="button" id="logout">Sair</button></div>'+
       '<p class="msg" id="saveMsg"></p></form></div>'+
   '</section>'+
   '<footer><button class="linkbtn" type="button" id="openAdmin">Admin</button></footer>'+
@@ -388,7 +388,7 @@ setTimeout(function(){sailTo({gaia:state.gaia,arrabida:state.arrabida},1600)},35
 function showAdmin(open){$("admin").hidden=!open;$("openAdmin").hidden=open;var logged=recall("regata-admin")==="1";$("login").hidden=logged;$("panel").hidden=!logged;if(open)setTimeout(function(){(logged?$("in-gaia"):$("user")).focus()},0)}
 $("openAdmin").onclick=function(){showAdmin(true)};
 $("closeAdmin").onclick=function(){showAdmin(false)};
-$("logout").onclick=function(){store("regata-admin",null);showAdmin(false)};
+$("logout").onclick=function(){store("regata-admin",null);store("regata-cred",null);showAdmin(false)};
 if(recall("regata-admin")==="1")showAdmin(true);
 
 async function sha(txt){var buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(txt));return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0")}).join("")}
@@ -397,7 +397,7 @@ $("loginForm").addEventListener("submit",async function(e){
   var u=$("user").value.trim(),p=$("pass").value;
   var ok=false;try{ok=u===ADMIN_USER&&(await sha(u+"\n"+p))===PASS_HASH}catch(err){}
   if(!ok){msg.className="msg err";msg.textContent="Utilizador ou palavra-passe errados.";return}
-  $("pass").value="";store("regata-admin","1");showAdmin(true);
+  store("regata-cred",JSON.stringify({u:u,p:p}));$("pass").value="";store("regata-admin","1");showAdmin(true);
 });
 root.addEventListener("click",function(e){
   var b=e.target.closest("[data-step]");if(!b)return;
@@ -411,23 +411,16 @@ $("scoreForm").addEventListener("submit",async function(e){
   if(bad){msg.className="msg err";msg.textContent="Os pontos têm de ser números inteiros entre 0 e 999.";return}
   var btn=$("saveBtn");btn.disabled=true;msg.textContent="A guardar…";
   state=next;$("board").innerHTML=legend();$("updated").textContent=fmtDate(state.updated);sailTo(next,1200);
-  var tok=$("ghtoken").value.trim()||recall("regata-token")||"";
-  if(!tok){btn.disabled=false;msg.className="msg err";msg.textContent="Cola o token do GitHub para poder guardar.";return}
-  var api="https://api.github.com/repos/"+REPO+"/contents/state.json",hd={Authorization:"Bearer "+tok,Accept:"application/vnd.github+json"};
+  var cred=null;try{cred=JSON.parse(recall("regata-cred")||"null")}catch(x){}
+  if(!cred){btn.disabled=false;msg.className="msg err";msg.textContent="Sessão expirada. Sai e volta a entrar.";return}
   try{
-    var cur=await fetch(api,{headers:hd,cache:"no-store"}),sha=null;
-    if(cur.status===401||cur.status===403)throw{code:"auth"};
-    if(cur.ok)sha=(await cur.json()).sha;
-    var body={message:"pontos: Gaia "+next.gaia+" · Arrábida "+next.arrabida,content:btoa(JSON.stringify(next)),sha:sha||undefined};
-    var put=await fetch(api,{method:"PUT",headers:hd,body:JSON.stringify(body)});
-    if(put.status===401||put.status===403)throw{code:"auth"};
-    if(put.status===409||put.status===422)throw{code:"conflict"};
-    if(!put.ok)throw{code:"other"};
-    store("regata-token",tok);$("ghtoken").value="";btn.disabled=false;msg.className="msg ok";msg.textContent="Pontos guardados. Ficam visíveis para todos em cerca de um minuto.";
+    var res=await fetch(SAVE_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user:cred.u,pass:cred.p,gaia:next.gaia,arrabida:next.arrabida})});
+    var j=await res.json().catch(function(){return{}});
+    if(!res.ok)throw{code:j.code||"other"};
+    btn.disabled=false;msg.className="msg ok";msg.textContent="Pontos guardados. Ficam visíveis para todos em cerca de um minuto.";
   }catch(err){
     btn.disabled=false;msg.className="msg err";var c=err&&err.code;
-    if(c==="auth")store("regata-token",null);
-    msg.textContent=c==="auth"?"Token inválido ou sem permissão de escrita neste repositório.":c==="conflict"?"Alguém guardou ao mesmo tempo. Volta a tentar.":"Não foi possível guardar os pontos. Tenta outra vez.";
+    msg.textContent=c==="auth"?"Palavra-passe recusada. Sai e volta a entrar.":c==="conflict"?"Alguém guardou ao mesmo tempo. Volta a tentar.":c==="no-token"||c==="gh-auth"?"O servidor ainda não tem permissão para guardar. Avisa o David.":"Não foi possível guardar os pontos. Tenta outra vez.";
   }
 });
 

@@ -1,0 +1,11 @@
+name = "regata-pontes-save"
+main = "index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+REPO = "Boxib/regata-das-pontes"
+ADMIN_USER = "AdminLeal"
+ALLOWED_ORIGIN = "https://boxib.github.io"
+# SHA-256 de "<user>\n<password>" (o mesmo hash que já estava no index.html)
+PASS_HASH = "bb5804a6372e90e414dad8617c024d5559b4a79d61cbd910f6908fa3aed4127c"
+# Segredo (não está aqui): GH_TOKEN  ->  wrangler secret put GH_TOKEN
